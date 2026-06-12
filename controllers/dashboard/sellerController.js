@@ -1,141 +1,155 @@
-const { responseReturn } = require("../../utiles/response")
-const formidable = require("formidable")
-const cloudinary = require('cloudinary').v2
-const sellerModel = require("../../models/sellerModel")
+const { responseReturn } = require("../../utils/response");
+const formidable = require("formidable");
+const cloudinary = require("cloudinary").v2;
+const sellerModel = require("../../models/sellerModel");
 
 class sellerController {
-    
+  request_seller_get = async (req, res) => {
+    const { parPage, page, searchValue } = req.query;
+    const skipPage = parseInt(parPage) * (parseInt(page) - 1);
 
-    request_seller_get = async (req,res) => {
-        const {parPage,page,searchValue} = req.query
-        const skipPage = parseInt(parPage) * (parseInt(page) - 1)
+    try {
+      if (searchValue) {
+      } else {
+        const sellers = await sellerModel
+          .find({ status: "pending" })
+          .skip(skipPage)
+          .limit(parPage)
+          .sort({ createdAt: -1 });
 
-
-        try {
-            if(searchValue) {
-
-            }else{
-                const sellers = await sellerModel.find({ status: 'pending' })
-                .skip(skipPage).limit(parPage).sort({ createdAt: -1})
-
-                const totalSeller = await sellerModel.find({
-                    status: "pending"
-                }).countDocuments()
-                responseReturn(res, 200,{sellers,totalSeller})
-            }
-        } catch (error) {
-            responseReturn(res, 500,{ error: error.message })
-        }
-
+        const totalSeller = await sellerModel
+          .find({
+            status: "pending",
+          })
+          .countDocuments();
+        responseReturn(res, 200, { sellers, totalSeller });
+      }
+    } catch (error) {
+      responseReturn(res, 500, { error: error.message });
     }
+  };
 
-    get_seller = async (req,res) => {
-        const { sellerId } = req.params
-        try {
-            const seller =await sellerModel.findById(sellerId)
-            responseReturn(res, 200,{seller})
-        } catch (error) {
-            responseReturn(res, 500,{ error: error.message })
-        }
+  get_seller = async (req, res) => {
+    const { sellerId } = req.params;
+    try {
+      const seller = await sellerModel.findById(sellerId);
+      responseReturn(res, 200, { seller });
+    } catch (error) {
+      responseReturn(res, 500, { error: error.message });
     }
+  };
 
-    seller_status_update = async (req,res) => {
-        const { sellerId,status } = req.body
-        try {
-            await sellerModel.findByIdAndUpdate(sellerId,{status})
-            const seller =await sellerModel.findById(sellerId)
-            responseReturn(res, 200,{seller, message: 'Seller Status Updated Successfully'})
-        } catch (error) {
-            responseReturn(res, 500,{ error: error.message })
-        }
+  seller_status_update = async (req, res) => {
+    const { sellerId, status } = req.body;
+    try {
+      await sellerModel.findByIdAndUpdate(sellerId, { status });
+      const seller = await sellerModel.findById(sellerId);
+      responseReturn(res, 200, {
+        seller,
+        message: "Seller Status Updated Successfully",
+      });
+    } catch (error) {
+      responseReturn(res, 500, { error: error.message });
     }
+  };
 
-    get_active_sellers = async (req,res) => {
-        let { page,searchValue,parPage } = req.query
-        page = parseInt(page),
-        parPage = parseInt(parPage)
+  get_active_sellers = async (req, res) => {
+    let { page, searchValue, parPage } = req.query;
+    ((page = parseInt(page)), (parPage = parseInt(parPage)));
 
-        const skipPage = parPage * (page - 1)
-        
-        try {
-            if (searchValue) {
-                console.log(searchValue)
-                const sellers = await sellerModel.find({
-                    $text: { $search: searchValue },
-                    status: 'active'
-                }).skip(skipPage).limit(parPage).sort({createdAt: -1})
-                console.log(sellers)
+    const skipPage = parPage * (page - 1);
 
-                const totalSeller = await sellerModel.find({
-                    $text: { $search: searchValue },
-                    status: 'active'
-                }).countDocuments()
+    try {
+      if (searchValue) {
+        console.log(searchValue);
+        const sellers = await sellerModel
+          .find({
+            $text: { $search: searchValue },
+            status: "active",
+          })
+          .skip(skipPage)
+          .limit(parPage)
+          .sort({ createdAt: -1 });
+        console.log(sellers);
 
-                responseReturn(res,200,{sellers,totalSeller})
-            } else {
-                const sellers = await sellerModel.find({
-                    status: 'active'
-                }).skip(skipPage).limit(parPage).sort({createdAt: -1})
+        const totalSeller = await sellerModel
+          .find({
+            $text: { $search: searchValue },
+            status: "active",
+          })
+          .countDocuments();
 
-                const totalSeller = await sellerModel.find({
-                    status: 'active'
-                }).countDocuments()
+        responseReturn(res, 200, { sellers, totalSeller });
+      } else {
+        const sellers = await sellerModel
+          .find({
+            status: "active",
+          })
+          .skip(skipPage)
+          .limit(parPage)
+          .sort({ createdAt: -1 });
 
-                responseReturn(res,200,{sellers,totalSeller})
-            }
-        } catch (error) {
-            console.log('active seller get ' + error.message)
-        }
+        const totalSeller = await sellerModel
+          .find({
+            status: "active",
+          })
+          .countDocuments();
+
+        responseReturn(res, 200, { sellers, totalSeller });
+      }
+    } catch (error) {
+      console.log("active seller get " + error.message);
     }
+  };
 
-    get_deactive_sellers = async (req,res) => {
-        let { page,searchValue,parPage } = req.query
-        page = parseInt(page),
-        parPage = parseInt(parPage)
+  get_deactive_sellers = async (req, res) => {
+    let { page, searchValue, parPage } = req.query;
+    ((page = parseInt(page)), (parPage = parseInt(parPage)));
 
-        const skipPage = parPage * (page - 1)
+    const skipPage = parPage * (page - 1);
 
-        try {
-            if (searchValue) {
-                
+    try {
+      if (searchValue) {
+        const sellers = await sellerModel
+          .find({
+            $text: {
+              $search: searchValue,
+            },
+            status: "deactive",
+          })
+          .skip(skipPage)
+          .limit(parPage)
+          .sort({ createdAt: -1 });
 
-                const sellers = await sellerModel.find({
-                    $text: {
-                         $search: searchValue ,
-                    },
-                    status: 'deactive'
-                }).skip(skipPage).limit(parPage).sort({createdAt: -1})
+        const totalSeller = await sellerModel
+          .find({
+            $text: { $search: searchValue },
+            status: "deactive",
+          })
+          .countDocuments();
 
-            
+        responseReturn(res, 200, { sellers, totalSeller });
+      } else {
+        const sellers = await sellerModel
+          .find({
+            status: "deactive",
+          })
+          .skip(skipPage)
+          .limit(parPage)
+          .sort({ createdAt: -1 });
 
-                const totalSeller = await sellerModel.find({
-                    $text: { $search: searchValue },
-                    status: 'deactive'
-                }).countDocuments()
+        const totalSeller = await sellerModel
+          .find({
+            status: "deactive",
+          })
+          .countDocuments();
 
-                responseReturn(res,200,{sellers,totalSeller})
-            } else {
-                const sellers = await sellerModel.find({
-                    status: 'deactive'
-                }).skip(skipPage).limit(parPage).sort({createdAt: -1})
-
-                const totalSeller = await sellerModel.find({
-                    status: 'deactive'
-                }).countDocuments()
-
-                
-                
-                
-
-                responseReturn(res,200,{sellers,totalSeller})
-
-
-            }
-        
-        } catch (error) {
-            console.log('deactive seller get ' + error.message)
-        }
+        responseReturn(res, 200, { sellers, totalSeller });
+      }
+    } catch (error) {
+      console.log("deactive seller get " + error.message);
     }
+  };
 }
 
 module.exports = new sellerController();

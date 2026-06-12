@@ -14,9 +14,10 @@ Entry point: `server.js` (Express HTTP + Socket.IO on the same port).
 - **HTTP:** Express 4, body-parser, cookie-parser, cors
 - **Database:** MongoDB via Mongoose 8
 - **Real-time:** Socket.IO 4 (in-memory user tracking in `server.js`)
-- **Auth:** JWT in `accessToken` cookie, 7-day expiry (`utiles/tokenCreate.js`)
+- **Auth:** JWT in `accessToken` cookie, 7-day expiry (`utils/tokenCreate.js`)
 - **Uploads:** Cloudinary + formidable
 - **Payments:** Stripe Connect
+- **API Docs:** Swagger UI via `swagger-ui-express`, OpenAPI 3 spec in `docs/openapi/`
 
 ## Directory Layout
 
@@ -26,11 +27,14 @@ controllers/           # Business logic — one export per handler function
 routes/                # Express routers, mounted at /api in server.js
 models/                # Mongoose schemas
 middlewares/           # authMiddleware.js — JWT verification from cookies
-utiles/                # Shared utilities (note: folder is "utiles", not "utils")
+utils/                 # Shared utilities
   db.js                # mongoose.connect(process.env.DB_URL)
   tokenCreate.js       # JWT sign helper
   response.js          # responseReturn(res, code, data)
   queryProducts.js     # Product search/filter helper
+docs/
+  swagger.js           # Mounts /api-docs and /api-docs.json
+  openapi/             # OpenAPI spec builder and path definitions
 ```
 
 ### Route → Controller Mapping
@@ -83,7 +87,7 @@ No test suite exists. Do not add tests unless explicitly requested.
 - Controller functions use `snake_case` naming (e.g. `seller_register`, `add_product`)
 - Route paths use `kebab-case` (e.g. `/product-add`, `/get-sellers`)
 - Models use PascalCase filenames with camelCase schema fields
-- Responses go through `responseReturn(res, code, data)` from `utiles/response.js`
+- Responses go through `responseReturn(res, code, data)` from `utils/response.js`
 - Async handlers use `async/await`; errors often return via `responseReturn` with status 500/409
 
 ### Auth pattern
@@ -102,6 +106,7 @@ router.get('/some-route', authMiddleware, controller.handler);
 3. If protected, wrap with `authMiddleware`
 4. If new collection needed, create schema in `models/`
 5. Mount is already handled — all routes use `/api` prefix in `server.js`
+6. Add or update the OpenAPI path in `docs/openapi/paths/` for Swagger docs
 
 ### Image uploads
 
@@ -126,7 +131,8 @@ Real-time chat logic lives directly in `server.js` (not in controllers). In-memo
 - Read env vars via `process.env.*` (dotenv loaded in `server.js`)
 - Keep changes minimal and focused on the requested task
 - Use `npm start` / Docker for production runs; `npm run dev` for local development
-- Preserve the `utiles/` folder name (do not rename to `utils` without explicit request)
+- Preserve existing folder naming conventions in this repo
+- Update `docs/openapi/paths/` when adding or changing REST endpoints
 
 ## Do Not
 
@@ -152,7 +158,7 @@ Edit the `cors({ origin: [...] })` block in `server.js`.
 
 ### Debug DB connection
 
-Check `utiles/db.js` — connection uses `process.env.DB_URL`. Logs `database connected..` on success.
+Check `utils/db.js` — connection uses `process.env.DB_URL`. Logs `database connected..` on success.
 
 ## Git Workflow
 

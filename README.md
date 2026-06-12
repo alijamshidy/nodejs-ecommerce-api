@@ -15,6 +15,20 @@ REST API and WebSocket server for a multi-vendor e-commerce marketplace. Support
 | Auth | JWT (cookie-based) |
 | File upload | Cloudinary |
 | Payments | Stripe Connect |
+| API Docs | Swagger UI (OpenAPI 3) |
+
+## API Documentation (Swagger)
+
+Interactive API docs are available when the server is running:
+
+| URL | Description |
+|-----|-------------|
+| `http://localhost:5000/api-docs` | Swagger UI — try endpoints in the browser |
+| `http://localhost:5000/api-docs.json` | Raw OpenAPI 3.0 JSON spec |
+
+OpenAPI spec source files live in `docs/openapi/`. To add or update an endpoint, edit the matching file under `docs/openapi/paths/` and restart the server.
+
+**Testing authenticated routes in Swagger UI:** Log in via `/admin-login` or `/seller-login` first (this sets the `accessToken` cookie). Swagger is configured with `withCredentials: true` so cookies are sent on subsequent requests.
 
 ## Prerequisites
 
@@ -58,6 +72,8 @@ npm run dev
 
 Server runs at `http://localhost:5000`.
 
+Open Swagger docs at `http://localhost:5000/api-docs`.
+
 ## Docker
 
 ```bash
@@ -68,6 +84,7 @@ docker compose up --build
 | Service | URL / Port |
 |---------|------------|
 | API | `http://localhost:5000` |
+| Swagger UI | `http://localhost:5000/api-docs` |
 | MongoDB | `localhost:27017` |
 
 Useful commands:
@@ -98,7 +115,10 @@ backend/
 ├── routes/                   # Route definitions (mounted under /api)
 ├── models/                   # Mongoose schemas
 ├── middlewares/              # authMiddleware (JWT from cookies)
-├── utiles/                   # Shared helpers (db, token, response)
+├── utils/                   # Shared helpers (db, token, response)
+├── docs/
+│   ├── swagger.js           # Swagger UI setup
+│   └── openapi/             # OpenAPI 3 spec (paths, components)
 ├── Dockerfile
 ├── docker-compose.yml
 └── .env.example
