@@ -50,6 +50,21 @@ const components = {
         name: { type: 'string' },
       },
     },
+    SendOtpRequest: {
+      type: 'object',
+      required: ['email'],
+      properties: {
+        email: { type: 'string', format: 'email' },
+      },
+    },
+    VerifyOtpRequest: {
+      type: 'object',
+      required: ['email', 'otp'],
+      properties: {
+        email: { type: 'string', format: 'email' },
+        otp: { type: 'string', example: '123456' },
+      },
+    },
     UserInfo: {
       type: 'object',
       properties: {

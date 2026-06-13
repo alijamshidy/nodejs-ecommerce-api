@@ -6,6 +6,7 @@ const bcrpty = require("bcrypt");
 const formidable = require("formidable");
 const cloudinary = require("cloudinary").v2;
 const { createToken } = require("../utils/tokenCreate");
+const { debugLog } = require("../utils/debugLog");
 
 class authControllers {
   admin_login = async (req, res) => {
@@ -15,8 +16,11 @@ class authControllers {
       if (admin) {
         const match = await bcrpty.compare(password, admin.password);
         if (match) {
+          if (!admin._id) {
+            return responseReturn(res, 500, { error: "Invalid user record" });
+          }
           const token = await createToken({
-            id: admin.id,
+            id: admin._id.toString(),
             role: admin.role,
           });
           res.cookie("accessToken", token, {
@@ -36,15 +40,33 @@ class authControllers {
 
   getUser = async (req, res) => {
     const { id, role } = req;
+    // #region agent log
+    debugLog({location:'authControllers.js:getUser:entry',message:'getUser called',data:{id,role,dbUrl:process.env.DB_URL},hypothesisId:'A,C,D'});
+    // #endregion
     try {
       if (role === "admin") {
         const user = await adminModel.findById(id);
+        // #region agent log
+        debugLog({location:'authControllers.js:getUser:admin-branch',message:'admin lookup result',data:{found:!!user,userId:user?._id?.toString()},hypothesisId:'A,D'});
+        // #endregion
+        if (!user) {
+          return responseReturn(res, 404, { error: "User not found" });
+        }
         responseReturn(res, 200, { userInfo: user });
       } else {
         const seller = await sellerModel.findById(id);
+        // #region agent log
+        debugLog({location:'authControllers.js:getUser:seller-branch',message:'seller lookup result',data:{found:!!seller,sellerId:seller?._id?.toString()},hypothesisId:'A,C,D'});
+        // #endregion
+        if (!seller) {
+          return responseReturn(res, 404, { error: "User not found" });
+        }
         responseReturn(res, 200, { userInfo: seller });
       }
     } catch (error) {
+      // #region agent log
+      debugLog({location:'authControllers.js:getUser:error',message:'getUser exception',data:{errorMessage:error.message,errorName:error.name},hypothesisId:'D'});
+      // #endregion
       responseReturn(res, 500, { error: "Internal Server Error" });
     }
   };
@@ -90,8 +112,11 @@ class authControllers {
       if (seller) {
         const match = await bcrpty.compare(password, seller.password);
         if (match) {
+          if (!seller._id) {
+            return responseReturn(res, 500, { error: "Invalid user record" });
+          }
           const token = await createToken({
-            id: seller.id,
+            id: seller._id.toString(),
             role: seller.role,
           });
           res.cookie("accessToken", token, {

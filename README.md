@@ -6,25 +6,25 @@ REST API and WebSocket server for a multi-vendor e-commerce marketplace. Support
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|------------|
-| Runtime | Node.js 20 |
-| Framework | Express 4 |
-| Database | MongoDB (Mongoose 8) |
-| Real-time | Socket.IO 4 |
-| Auth | JWT (cookie-based) |
-| File upload | Cloudinary |
-| Payments | Stripe Connect |
-| API Docs | Swagger UI (OpenAPI 3) |
+| Layer       | Technology             |
+| ----------- | ---------------------- |
+| Runtime     | Node.js 20             |
+| Framework   | Express 4              |
+| Database    | MongoDB (Mongoose 8)   |
+| Real-time   | Socket.IO 4            |
+| Auth        | JWT (cookie-based)     |
+| File upload | Cloudinary             |
+| Payments    | Stripe Connect         |
+| API Docs    | Swagger UI (OpenAPI 3) |
 
 ## API Documentation (Swagger)
 
 Interactive API docs are available when the server is running:
 
-| URL | Description |
-|-----|-------------|
-| `http://localhost:5000/api-docs` | Swagger UI — try endpoints in the browser |
-| `http://localhost:5000/api-docs.json` | Raw OpenAPI 3.0 JSON spec |
+| URL                                   | Description                               |
+| ------------------------------------- | ----------------------------------------- |
+| `http://localhost:5000/api-docs`      | Swagger UI — try endpoints in the browser |
+| `http://localhost:5000/api-docs.json` | Raw OpenAPI 3.0 JSON spec                 |
 
 OpenAPI spec source files live in `docs/openapi/`. To add or update an endpoint, edit the matching file under `docs/openapi/paths/` and restart the server.
 
@@ -41,7 +41,7 @@ OpenAPI spec source files live in `docs/openapi/`. To add or update an endpoint,
 ### 1. Clone and install
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/alijamshidy/ecommerce-backend.git
 cd backend
 npm install
 ```
@@ -54,15 +54,15 @@ cp .env.example .env
 
 Edit `.env`:
 
-| Variable | Description |
-|----------|-------------|
-| `PORT` | Server port (default: `5000`) |
-| `DB_URL` | MongoDB connection string |
-| `SECRET` | JWT signing secret |
-| `cloud_name` | Cloudinary cloud name |
-| `api_key` | Cloudinary API key |
-| `api_secret` | Cloudinary API secret |
-| `STRIPE_SECRET_KEY` | Stripe secret key |
+| Variable            | Description                   |
+| ------------------- | ----------------------------- |
+| `PORT`              | Server port (default: `5000`) |
+| `DB_URL`            | MongoDB connection string     |
+| `SECRET`            | JWT signing secret            |
+| `cloud_name`        | Cloudinary cloud name         |
+| `api_key`           | Cloudinary API key            |
+| `api_secret`        | Cloudinary API secret         |
+| `STRIPE_SECRET_KEY` | Stripe secret key             |
 
 ### 3. Run locally
 
@@ -81,11 +81,11 @@ cp .env.example .env
 docker compose up --build
 ```
 
-| Service | URL / Port |
-|---------|------------|
-| API | `http://localhost:5000` |
+| Service    | URL / Port                       |
+| ---------- | -------------------------------- |
+| API        | `http://localhost:5000`          |
 | Swagger UI | `http://localhost:5000/api-docs` |
-| MongoDB | `localhost:27017` |
+| MongoDB    | `localhost:27017`                |
 
 Useful commands:
 
@@ -100,11 +100,11 @@ docker compose down -v
 
 ## Scripts
 
-| Command | Description |
-|---------|-------------|
-| `npm start` | Production (`node server.js`) |
-| `npm run dev` | Development with nodemon |
-| `npm run server` | Alias for `dev` |
+| Command          | Description                   |
+| ---------------- | ----------------------------- |
+| `npm start`      | Production (`node server.js`) |
+| `npm run dev`    | Development with nodemon      |
+| `npm run server` | Alias for `dev`               |
 
 ## Project Structure
 
@@ -130,90 +130,90 @@ All REST routes are mounted under the `/api` prefix.
 
 ### Authentication
 
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| POST | `/admin-login` | - | Admin login |
-| POST | `/seller-register` | - | Seller registration |
-| POST | `/seller-login` | - | Seller login |
-| GET | `/get-user` | yes | Current user info |
-| POST | `/profile-image-upload` | yes | Upload profile image |
-| POST | `/profile-info-add` | yes | Update profile |
-| GET | `/logout` | yes | Logout |
-| POST | `/customer/customer-register` | - | Customer registration |
-| POST | `/customer/customer-login` | - | Customer login |
-| GET | `/customer/logout` | - | Customer logout |
+| Method | Path                          | Auth | Description           |
+| ------ | ----------------------------- | ---- | --------------------- |
+| POST   | `/admin-login`                | -    | Admin login           |
+| POST   | `/seller-register`            | -    | Seller registration   |
+| POST   | `/seller-login`               | -    | Seller login          |
+| GET    | `/get-user`                   | yes  | Current user info     |
+| POST   | `/profile-image-upload`       | yes  | Upload profile image  |
+| POST   | `/profile-info-add`           | yes  | Update profile        |
+| GET    | `/logout`                     | yes  | Logout                |
+| POST   | `/customer/customer-register` | -    | Customer registration |
+| POST   | `/customer/customer-login`    | -    | Customer login        |
+| GET    | `/customer/logout`            | -    | Customer logout       |
 
 ### Dashboard (Admin / Seller)
 
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| POST | `/category-add` | yes | Add category |
-| GET | `/category-get` | yes | List categories |
-| POST | `/product-add` | yes | Add product |
-| GET | `/products-get` | yes | Seller products |
-| GET | `/product-get/:productId` | yes | Product details |
-| POST | `/product-update` | yes | Update product |
-| POST | `/product-image-update` | yes | Update product image |
-| GET | `/request-seller-get` | yes | Pending seller requests |
-| GET | `/get-seller/:sellerId` | yes | Seller details |
-| POST | `/seller-status-update` | yes | Update seller status |
-| GET | `/get-sellers` | yes | Active sellers |
-| GET | `/get-deactive-sellers` | yes | Inactive sellers |
+| Method | Path                      | Auth | Description             |
+| ------ | ------------------------- | ---- | ----------------------- |
+| POST   | `/category-add`           | yes  | Add category            |
+| GET    | `/category-get`           | yes  | List categories         |
+| POST   | `/product-add`            | yes  | Add product             |
+| GET    | `/products-get`           | yes  | Seller products         |
+| GET    | `/product-get/:productId` | yes  | Product details         |
+| POST   | `/product-update`         | yes  | Update product          |
+| POST   | `/product-image-update`   | yes  | Update product image    |
+| GET    | `/request-seller-get`     | yes  | Pending seller requests |
+| GET    | `/get-seller/:sellerId`   | yes  | Seller details          |
+| POST   | `/seller-status-update`   | yes  | Update seller status    |
+| GET    | `/get-sellers`            | yes  | Active sellers          |
+| GET    | `/get-deactive-sellers`   | yes  | Inactive sellers        |
 
 ### Storefront (Home)
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/home/get-category` | Public categories |
-| GET | `/home/get-product` | Products |
-| GET | `/home/price-range-latest-product` | Price filter |
-| GET | `/home/query-products` | Search products |
-| GET | `/home/product-details/:slug` | Product details |
-| POST | `/home/customer/submit-review` | Submit review |
-| GET | `/home/customer/get-review/:productId` | Product reviews |
+| Method | Path                                   | Description       |
+| ------ | -------------------------------------- | ----------------- |
+| GET    | `/home/get-category`                   | Public categories |
+| GET    | `/home/get-product`                    | Products          |
+| GET    | `/home/price-range-latest-product`     | Price filter      |
+| GET    | `/home/query-products`                 | Search products   |
+| GET    | `/home/product-details/:slug`          | Product details   |
+| POST   | `/home/customer/submit-review`         | Submit review     |
+| GET    | `/home/customer/get-review/:productId` | Product reviews   |
 
 ### Cart and Wishlist
 
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/home/product/add-to-card` | Add to cart |
-| GET | `/home/product/get-card-products/:userId` | Cart items |
-| DELETE | `/home/product/delete-card-product/:card_id` | Remove from cart |
-| PUT | `/home/product/quantity-inc/:card_id` | Increase quantity |
-| PUT | `/home/product/quantity-dec/:card_id` | Decrease quantity |
-| POST | `/home/product/add-to-wishlist` | Add to wishlist |
-| GET | `/home/product/get-wishlist-products/:userId` | Wishlist items |
+| Method | Path                                                | Description          |
+| ------ | --------------------------------------------------- | -------------------- |
+| POST   | `/home/product/add-to-card`                         | Add to cart          |
+| GET    | `/home/product/get-card-products/:userId`           | Cart items           |
+| DELETE | `/home/product/delete-card-product/:card_id`        | Remove from cart     |
+| PUT    | `/home/product/quantity-inc/:card_id`               | Increase quantity    |
+| PUT    | `/home/product/quantity-dec/:card_id`               | Decrease quantity    |
+| POST   | `/home/product/add-to-wishlist`                     | Add to wishlist      |
+| GET    | `/home/product/get-wishlist-products/:userId`       | Wishlist items       |
 | DELETE | `/home/product/remove-wishlist-product/:wishlistId` | Remove from wishlist |
 
 ### Orders
 
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/home/order/place-order` | Place order |
-| GET | `/home/customer/get-dashboard-data/:userId` | Customer dashboard |
-| GET | `/home/customer/get-orders/:customerId/:status` | Customer orders |
-| GET | `/home/customer/get-order-details/:orderId` | Order details |
-| GET | `/admin-orders` | Admin orders |
-| GET | `/admin/order/:orderId` | Admin order details |
-| PUT | `/admin/order-status/update/:orderId` | Admin status update |
-| GET | `/seller/orders/:sellerId` | Seller orders |
-| GET | `/seller/order/:orderId` | Seller order details |
-| PUT | `/seller/order-status/update/:orderId` | Seller status update |
+| Method | Path                                            | Description          |
+| ------ | ----------------------------------------------- | -------------------- |
+| POST   | `/home/order/place-order`                       | Place order          |
+| GET    | `/home/customer/get-dashboard-data/:userId`     | Customer dashboard   |
+| GET    | `/home/customer/get-orders/:customerId/:status` | Customer orders      |
+| GET    | `/home/customer/get-order-details/:orderId`     | Order details        |
+| GET    | `/admin-orders`                                 | Admin orders         |
+| GET    | `/admin/order/:orderId`                         | Admin order details  |
+| PUT    | `/admin/order-status/update/:orderId`           | Admin status update  |
+| GET    | `/seller/orders/:sellerId`                      | Seller orders        |
+| GET    | `/seller/order/:orderId`                        | Seller order details |
+| PUT    | `/seller/order-status/update/:orderId`          | Seller status update |
 
 ### Chat and Payments
 
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| POST | `/chat/customer/add-customer-friend` | - | Add chat friend |
-| POST | `/chat/customer/send-message-to-seller` | - | Customer to seller message |
-| GET | `/chat/seller/get-customers/:sellerId` | - | Seller customers |
-| GET | `/chat/seller/get-customer-message/:customerId` | yes | Message history |
-| POST | `/chat/seller/send-message-to-customer` | yes | Seller to customer message |
-| GET | `/chat/admin/get-sellers` | yes | Sellers for admin |
-| POST | `/chat/message-send-seller-admin` | yes | Seller-admin message |
-| GET | `/chat/get-admin-message/:receverId` | yes | Admin messages |
-| GET | `/chat/get-seller-message` | yes | Seller messages |
-| GET | `/payment/create-stripe-connect-account` | yes | Stripe Connect account |
+| Method | Path                                            | Auth | Description                |
+| ------ | ----------------------------------------------- | ---- | -------------------------- |
+| POST   | `/chat/customer/add-customer-friend`            | -    | Add chat friend            |
+| POST   | `/chat/customer/send-message-to-seller`         | -    | Customer to seller message |
+| GET    | `/chat/seller/get-customers/:sellerId`          | -    | Seller customers           |
+| GET    | `/chat/seller/get-customer-message/:customerId` | yes  | Message history            |
+| POST   | `/chat/seller/send-message-to-customer`         | yes  | Seller to customer message |
+| GET    | `/chat/admin/get-sellers`                       | yes  | Sellers for admin          |
+| POST   | `/chat/message-send-seller-admin`               | yes  | Seller-admin message       |
+| GET    | `/chat/get-admin-message/:receverId`            | yes  | Admin messages             |
+| GET    | `/chat/get-seller-message`                      | yes  | Seller messages            |
+| GET    | `/payment/create-stripe-connect-account`        | yes  | Stripe Connect account     |
 
 ## Socket.IO Events
 
@@ -236,13 +236,13 @@ All REST routes are mounted under the `/api` prefix.
 
 ## Troubleshooting
 
-| Problem | Solution |
-|---------|----------|
-| No `database connected..` log | Check `DB_URL` and MongoDB access |
-| `409 Please Login` | Missing or expired `accessToken` cookie |
-| Docker build fails | Start Docker Desktop |
-| CORS error | Add frontend origin in `server.js` |
-| bcrypt install error | Use Node 20+ and build tools (included in Docker) |
+| Problem                       | Solution                                          |
+| ----------------------------- | ------------------------------------------------- |
+| No `database connected..` log | Check `DB_URL` and MongoDB access                 |
+| `409 Please Login`            | Missing or expired `accessToken` cookie           |
+| Docker build fails            | Start Docker Desktop                              |
+| CORS error                    | Add frontend origin in `server.js`                |
+| bcrypt install error          | Use Node 20+ and build tools (included in Docker) |
 
 ## Related Docs
 

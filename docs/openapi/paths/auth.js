@@ -214,6 +214,60 @@ module.exports = {
       },
     },
   },
+  '/customer/send-otp': {
+    post: {
+      tags: ['Customer Auth'],
+      summary: 'Send login OTP to customer email',
+      requestBody: {
+        required: true,
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/schemas/SendOtpRequest' },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'OTP sent if email is registered',
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/Message' },
+            },
+          },
+        },
+        400: { $ref: '#/components/responses/NotFound' },
+        429: { $ref: '#/components/responses/NotFound' },
+        500: { $ref: '#/components/responses/ServerError' },
+      },
+    },
+  },
+  '/customer/verify-otp': {
+    post: {
+      tags: ['Customer Auth'],
+      summary: 'Verify OTP and login customer',
+      requestBody: {
+        required: true,
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/schemas/VerifyOtpRequest' },
+          },
+        },
+      },
+      responses: {
+        201: {
+          description: 'Login successful; sets customerToken cookie',
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/TokenResponse' },
+            },
+          },
+        },
+        400: { $ref: '#/components/responses/NotFound' },
+        404: { $ref: '#/components/responses/NotFound' },
+        500: { $ref: '#/components/responses/ServerError' },
+      },
+    },
+  },
   '/customer/logout': {
     get: {
       tags: ['Customer Auth'],
