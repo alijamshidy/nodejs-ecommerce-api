@@ -26,6 +26,10 @@ const IDS = {
   prodLaptop: ObjectId("6a2be0635041be13d395fd91"),
   prodShirt: ObjectId("6a2be0635041be13d395fd92"),
   prodLamp: ObjectId("6a2be0635041be13d395fd93"),
+  order1: ObjectId("6a2be0635041be13d395fda0"),
+  authorOrder1: ObjectId("6a2be0635041be13d395fda1"),
+  order2: ObjectId("6a2be0635041be13d395fda2"),
+  authorOrder2: ObjectId("6a2be0635041be13d395fda3"),
 };
 
 const now = new Date();
@@ -275,6 +279,102 @@ db.wishlists.insertMany([
     discount: 15,
     rating: 4.8,
     slug: "Desk-Lamp-LED",
+    createdAt: now,
+    updatedAt: now,
+  },
+]);
+
+db.customerorders.insertMany([
+  {
+    _id: IDS.order1,
+    customerId: IDS.customer1,
+    products: [
+      {
+        name: "Smartphone X",
+        price: 499,
+        quantity: 1,
+        sellerId: IDS.seller1,
+        image: "https://placehold.co/600x600/png?text=Smartphone",
+      },
+    ],
+    price: 499,
+    payment_status: "paid",
+    shippingInfo: {
+      name: "John Customer",
+      address: "Tehran, Valiasr St",
+      phone: "09121111111",
+    },
+    delivery_status: "pending",
+    date: "June 1, 2026 10:00 AM",
+    createdAt: now,
+    updatedAt: now,
+  },
+  {
+    _id: IDS.order2,
+    customerId: IDS.customer2,
+    products: [
+      {
+        name: "Desk Lamp LED",
+        price: 45,
+        quantity: 2,
+        sellerId: IDS.seller2,
+        image: "https://placehold.co/600x600/png?text=Lamp",
+      },
+    ],
+    price: 90,
+    payment_status: "paid",
+    shippingInfo: {
+      name: "Mary Customer",
+      address: "Isfahan, Chaharbagh",
+      phone: "09122222222",
+    },
+    delivery_status: "processing",
+    date: "June 5, 2026 2:30 PM",
+    createdAt: now,
+    updatedAt: now,
+  },
+]);
+
+db.authororders.insertMany([
+  {
+    _id: IDS.authorOrder1,
+    orderId: IDS.order1,
+    sellerId: IDS.seller1,
+    products: [
+      {
+        name: "Smartphone X",
+        price: 499,
+        quantity: 1,
+        sellerId: IDS.seller1,
+        image: "https://placehold.co/600x600/png?text=Smartphone",
+      },
+    ],
+    price: 499,
+    payment_status: "paid",
+    shippingInfo: "Easy Main Warehouse",
+    delivery_status: "pending",
+    date: "June 1, 2026 10:00 AM",
+    createdAt: now,
+    updatedAt: now,
+  },
+  {
+    _id: IDS.authorOrder2,
+    orderId: IDS.order2,
+    sellerId: IDS.seller2,
+    products: [
+      {
+        name: "Desk Lamp LED",
+        price: 45,
+        quantity: 2,
+        sellerId: IDS.seller2,
+        image: "https://placehold.co/600x600/png?text=Lamp",
+      },
+    ],
+    price: 90,
+    payment_status: "paid",
+    shippingInfo: "Easy Main Warehouse",
+    delivery_status: "processing",
+    date: "June 5, 2026 2:30 PM",
     createdAt: now,
     updatedAt: now,
   },

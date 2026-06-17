@@ -30,10 +30,14 @@ var allSeller = [];
 var admin = {};
 
 const addUser = (customerId, socketId, userInfo) => {
-  const checkUser = allCustomer.some(u => u.customerId === customerId);
-  if (!checkUser) {
+  const id = String(customerId);
+  const existing = allCustomer.find(u => u.customerId === id);
+  if (existing) {
+    existing.socketId = socketId;
+    existing.userInfo = userInfo;
+  } else {
     allCustomer.push({
-      customerId,
+      customerId: id,
       socketId,
       userInfo,
     });
@@ -41,10 +45,14 @@ const addUser = (customerId, socketId, userInfo) => {
 };
 
 const addSeller = (sellerId, socketId, userInfo) => {
-  const checkSeller = allSeller.some(u => u.sellerId === sellerId);
-  if (!checkSeller) {
+  const id = String(sellerId);
+  const existing = allSeller.find(u => u.sellerId === id);
+  if (existing) {
+    existing.socketId = socketId;
+    existing.userInfo = userInfo;
+  } else {
     allSeller.push({
-      sellerId,
+      sellerId: id,
       socketId,
       userInfo,
     });
@@ -52,16 +60,19 @@ const addSeller = (sellerId, socketId, userInfo) => {
 };
 
 const findCustomer = customerId => {
-  return allCustomer.find(c => c.customerId === customerId);
+  return allCustomer.find(c => c.customerId === String(customerId));
 };
 
 const findSeller = sellerId => {
-  return allSeller.find(c => c.sellerId === sellerId);
+  return allSeller.find(c => c.sellerId === String(sellerId));
 };
 
 const remove = socketId => {
   allCustomer = allCustomer.filter(c => c.socketId !== socketId);
   allSeller = allSeller.filter(c => c.socketId !== socketId);
+  if (admin.socketId === socketId) {
+    admin.socketId = null;
+  }
 };
 
 io.on("connection", soc => {
@@ -77,28 +88,41 @@ io.on("connection", soc => {
 
   soc.on("send_seller_message", msg => {
     const customer = findCustomer(msg.receverId);
-    if (customer !== undefined) {
-      soc.to(customer.socketId).emit("seller_message", msg);
+    if (customer) {
+      io.to(customer.socketId).emit("seller_message", msg);
     }
   });
 
   soc.on("send_customer_message", msg => {
     const seller = findSeller(msg.receverId);
-    if (seller !== undefined) {
-      soc.to(seller.socketId).emit("customer_message", msg);
+    if (seller) {
+      io.to(seller.socketId).emit("customer_message", msg);
     }
   });
 
   soc.on("send_message_admin_to_seller", msg => {
     const seller = findSeller(msg.receverId);
-    if (seller !== undefined) {
-      soc.to(seller.socketId).emit("receved_admin_message", msg);
+    if (seller) {
+      io.to(seller.socketId).emit("receved_admin_message", msg);
     }
   });
 
   soc.on("send_message_seller_to_admin", msg => {
     if (admin.socketId) {
-      soc.to(admin.socketId).emit("receved_seller_message", msg);
+      io.to(admin.socketId).emit("receved_seller_message", msg);
+    }
+  });
+
+  soc.on("send_message_admin_to_customer", msg => {
+    const customer = findCustomer(msg.receverId);
+    if (customer) {
+      io.to(customer.socketId).emit("admin_support_message", msg);
+    }
+  });
+
+  soc.on("send_message_customer_to_admin", msg => {
+    if (admin.socketId) {
+      io.to(admin.socketId).emit("receved_customer_message", msg);
     }
   });
 

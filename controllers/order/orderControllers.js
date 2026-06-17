@@ -21,6 +21,32 @@ function parseOrderPagination(query = {}) {
   };
 }
 
+function buildAdminOrderSearchMatch(searchValue) {
+  const search = searchValue?.trim();
+  if (!search) {
+    return null;
+  }
+
+  const orConditions = [
+    { "shippingInfo.name": { $regex: search, $options: "i" } },
+    {
+      $expr: {
+        $regexMatch: {
+          input: { $toString: "$_id" },
+          regex: search,
+          options: "i",
+        },
+      },
+    },
+  ];
+
+  if (ObjectId.isValid(search)) {
+    orConditions.push({ _id: new ObjectId(search) });
+  }
+
+  return { $or: orConditions };
+}
+
 class orderControllers {
   paymentCheck = async id => {
     try {
@@ -183,11 +209,17 @@ class orderControllers {
   };
 
   get_admin_orders = async (req, res) => {
-    const { searchValue } = req.query;
+    const searchMatch = buildAdminOrderSearchMatch(req.query.searchValue);
     const { skipPage, parPage } = parseOrderPagination(req.query);
 
     try {
-      const pipeline = [
+      const pipeline = [];
+
+      if (searchMatch) {
+        pipeline.push({ $match: searchMatch });
+      }
+
+      pipeline.push(
         {
           $lookup: {
             from: "authororders",
@@ -199,37 +231,14 @@ class orderControllers {
         { $sort: { createdAt: -1 } },
         { $skip: skipPage },
         { $limit: parPage },
-      ];
-
-      if (searchValue) {
-        pipeline.unshift({
-          $match: {
-            $or: [
-              { orderId: { $regex: searchValue, $options: "i" } },
-              { "shippingInfo.name": { $regex: searchValue, $options: "i" } },
-            ],
-          },
-        });
-      }
+      );
 
       const orders = await customerOrder.aggregate(pipeline);
 
       let totalOrder;
-      if (searchValue) {
+      if (searchMatch) {
         const countResult = await customerOrder.aggregate([
-          {
-            $match: {
-              $or: [
-                { orderId: { $regex: searchValue, $options: "i" } },
-                {
-                  "shippingInfo.name": {
-                    $regex: searchValue,
-                    $options: "i",
-                  },
-                },
-              ],
-            },
-          },
+          { $match: searchMatch },
           { $count: "total" },
         ]);
         totalOrder = countResult[0]?.total ?? 0;
