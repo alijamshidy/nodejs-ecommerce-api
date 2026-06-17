@@ -139,6 +139,29 @@ class productController {
     }
   };
 
+  product_delete = async (req, res) => {
+    const { productId } = req.params;
+    const { id, role } = req;
+
+    try {
+      const product = await productModel.findById(productId);
+      if (!product) {
+        return responseReturn(res, 404, { error: "Product not found" });
+      }
+
+      if (role !== "admin" && product.sellerId.toString() !== id) {
+        return responseReturn(res, 403, { error: "Forbidden" });
+      }
+
+      await productModel.findByIdAndDelete(productId);
+      return responseReturn(res, 200, {
+        message: "Product deleted successfully",
+      });
+    } catch (error) {
+      return responseReturn(res, 500, { error: error.message });
+    }
+  };
+
   product_image_update = async (req, res) => {
     const form = formidable({ multiples: true });
     form.parse(req, async (err, field, files) => {

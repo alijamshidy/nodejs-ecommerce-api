@@ -7,6 +7,20 @@ const {
   mongo: { ObjectId },
 } = require("mongoose");
 
+function parseOrderPagination(query = {}) {
+  const page = Math.max(1, parseInt(query.page, 10) || 1);
+  const parPage = Math.max(
+    1,
+    Math.min(100, parseInt(query.parPage, 10) || 10),
+  );
+
+  return {
+    page,
+    parPage,
+    skipPage: parPage * (page - 1),
+  };
+}
+
 class orderControllers {
   paymentCheck = async id => {
     try {
@@ -169,44 +183,64 @@ class orderControllers {
   };
 
   get_admin_orders = async (req, res) => {
-    let { page, searchValue, parPage } = req.query;
-    ((page = parseInt(page)), (parPage = parseInt(parPage)));
-
-    const skipPage = parPage * (page - 1);
+    const { searchValue } = req.query;
+    const { skipPage, parPage } = parseOrderPagination(req.query);
 
     try {
-      if (searchValue) {
-      } else {
-        const orders = await customerOrder
-          .aggregate([
-            {
-              $lookup: {
-                from: "authororders",
-                localField: "_id",
-                foreignField: "orderId",
-                as: "suborder",
-              },
-            },
-          ])
-          .skip(skipPage)
-          .limit(parPage)
-          .sort({ createdAt: -1 });
+      const pipeline = [
+        {
+          $lookup: {
+            from: "authororders",
+            localField: "_id",
+            foreignField: "orderId",
+            as: "suborder",
+          },
+        },
+        { $sort: { createdAt: -1 } },
+        { $skip: skipPage },
+        { $limit: parPage },
+      ];
 
-        const totalOrder = await customerOrder.aggregate([
+      if (searchValue) {
+        pipeline.unshift({
+          $match: {
+            $or: [
+              { orderId: { $regex: searchValue, $options: "i" } },
+              { "shippingInfo.name": { $regex: searchValue, $options: "i" } },
+            ],
+          },
+        });
+      }
+
+      const orders = await customerOrder.aggregate(pipeline);
+
+      let totalOrder;
+      if (searchValue) {
+        const countResult = await customerOrder.aggregate([
           {
-            $lookup: {
-              from: "authororders",
-              localField: "_id",
-              foreignField: "orderId",
-              as: "suborder",
+            $match: {
+              $or: [
+                { orderId: { $regex: searchValue, $options: "i" } },
+                {
+                  "shippingInfo.name": {
+                    $regex: searchValue,
+                    $options: "i",
+                  },
+                },
+              ],
             },
           },
+          { $count: "total" },
         ]);
-
-        responseReturn(res, 200, { orders, totalOrder: totalOrder.length });
+        totalOrder = countResult[0]?.total ?? 0;
+      } else {
+        totalOrder = await customerOrder.countDocuments();
       }
+
+      return responseReturn(res, 200, { orders, totalOrder });
     } catch (error) {
       console.log(error.message);
+      return responseReturn(res, 500, { error: error.message });
     }
   };
 
@@ -251,33 +285,27 @@ class orderControllers {
 
   get_seller_orders = async (req, res) => {
     const { sellerId } = req.params;
-    let { page, searchValue, parPage } = req.query;
-    ((page = parseInt(page)), (parPage = parseInt(parPage)));
-
-    const skipPage = parPage * (page - 1);
+    const { searchValue } = req.query;
+    const { skipPage, parPage } = parseOrderPagination(req.query);
 
     try {
+      const filter = { sellerId };
       if (searchValue) {
-      } else {
-        const orders = await authOrderModel
-          .find({
-            sellerId,
-          })
-          .skip(skipPage)
-          .limit(parPage)
-          .sort({ createdAt: -1 });
-
-        const totalOrder = await authOrderModel
-          .find({
-            sellerId,
-          })
-          .countDocuments();
-
-        responseReturn(res, 200, { orders, totalOrder });
+        filter.orderId = { $regex: searchValue, $options: "i" };
       }
+
+      const orders = await authOrderModel
+        .find(filter)
+        .skip(skipPage)
+        .limit(parPage)
+        .sort({ createdAt: -1 });
+
+      const totalOrder = await authOrderModel.find(filter).countDocuments();
+
+      return responseReturn(res, 200, { orders, totalOrder });
     } catch (error) {
       console.log("get seller order error" + error.message);
-      responseReturn(res, 500, { error: "Internal server error" });
+      return responseReturn(res, 500, { error: "Internal server error" });
     }
   };
 

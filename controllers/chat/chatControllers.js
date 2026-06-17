@@ -146,47 +146,52 @@ class chatControllers {
         myId: userId,
       });
 
-      let myFriends = data.myFriends;
-      let index = myFriends.findIndex(f => f.fdId === sellerId);
-      while (index > 0) {
-        let temp = myFriends[index];
-        myFriends[index] = myFriends[index - 1];
-        myFriends[index - 1] = temp;
-        index--;
+      if (data?.myFriends) {
+        let myFriends = data.myFriends;
+        let index = myFriends.findIndex(f => f.fdId === sellerId);
+        while (index > 0) {
+          let temp = myFriends[index];
+          myFriends[index] = myFriends[index - 1];
+          myFriends[index - 1] = temp;
+          index--;
+        }
+        await sellerCustomerModel.updateOne(
+          {
+            myId: userId,
+          },
+          {
+            myFriends,
+          },
+        );
       }
-      await sellerCustomerModel.updateOne(
-        {
-          myId: userId,
-        },
-        {
-          myFriends,
-        },
-      );
 
       const data1 = await sellerCustomerModel.findOne({
         myId: sellerId,
       });
 
-      let myFriends1 = data1.myFriends;
-      let index1 = myFriends1.findIndex(f => f.fdId === userId);
-      while (index1 > 0) {
-        let temp1 = myFriends1[index1];
-        myFriends1[index1] = myFriends1[index1 - 1];
-        myFriends1[index1 - 1] = temp1;
-        index1--;
+      if (data1?.myFriends) {
+        let myFriends1 = data1.myFriends;
+        let index1 = myFriends1.findIndex(f => f.fdId === userId);
+        while (index1 > 0) {
+          let temp1 = myFriends1[index1];
+          myFriends1[index1] = myFriends1[index1 - 1];
+          myFriends1[index1 - 1] = temp1;
+          index1--;
+        }
+        await sellerCustomerModel.updateOne(
+          {
+            myId: sellerId,
+          },
+          {
+            myFriends: myFriends1,
+          },
+        );
       }
-      await sellerCustomerModel.updateOne(
-        {
-          myId: sellerId,
-        },
-        {
-          myFriends1,
-        },
-      );
 
       responseReturn(res, 201, { message });
     } catch (error) {
       console.log(error.message);
+      return responseReturn(res, 500, { error: error.message });
     }
   };
 
@@ -264,6 +269,11 @@ class chatControllers {
       const data = await sellerCustomerModel.findOne({
         myId: senderId,
       });
+      if (!data?.myFriends) {
+        return responseReturn(res, 404, {
+          error: "Seller chat contacts not found",
+        });
+      }
 
       let myFriends = data.myFriends;
       let index = myFriends.findIndex(f => f.fdId === receverId);
@@ -282,9 +292,22 @@ class chatControllers {
         },
       );
 
-      const data1 = await sellerCustomerModel.findOne({
+      let data1 = await sellerCustomerModel.findOne({
         myId: receverId,
       });
+      if (!data1?.myFriends) {
+        const seller = await sellerModel.findById(senderId);
+        data1 = await sellerCustomerModel.create({
+          myId: receverId,
+          myFriends: [
+            {
+              fdId: senderId,
+              name: seller?.shopInfo?.shopName ?? name,
+              image: seller?.image ?? "",
+            },
+          ],
+        });
+      }
 
       let myFriends1 = data1.myFriends;
       let index1 = myFriends1.findIndex(f => f.fdId === senderId);
@@ -299,13 +322,14 @@ class chatControllers {
           myId: receverId,
         },
         {
-          myFriends1,
+          myFriends: myFriends1,
         },
       );
 
       responseReturn(res, 201, { message });
     } catch (error) {
       console.log(error.message);
+      return responseReturn(res, 500, { error: error.message });
     }
   };
 

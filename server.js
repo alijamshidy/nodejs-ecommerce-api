@@ -13,7 +13,7 @@ const server = http.createServer(app);
 
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:3001"],
+    origin: ["http://localhost:3000", "http://localhost:3001","*"],
     credentials: true,
   }),
 );
@@ -132,7 +132,7 @@ app.use("/api", require("./routes/authRoutes"));
 app.use("/api", require("./routes/home/customerAuthRoutes"));
 app.use("/api/home", require("./routes/home/homeRoutes"));
 app.use("/api", require("./routes/chatRoutes"));
-// app.use("/api", require("./routes/paymentRoutes"));
+app.use("/api", require("./routes/paymentRoutes"));
 
 const port = process.env.PORT;
 dbConnect();

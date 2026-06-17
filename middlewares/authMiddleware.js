@@ -2,7 +2,8 @@ const jwt = require('jsonwebtoken')
 const { debugLog } = require('../utils/debugLog')
 
 module.exports.authMiddleware = async(req,res,next) => {
-    const {accessToken} = req.cookies
+    const rawToken = req.cookies.accessToken
+    const accessToken = rawToken ? decodeURIComponent(rawToken) : undefined
     // #region agent log
     debugLog({location:'authMiddleware.js:entry',message:'authMiddleware called',data:{hasCookie:!!accessToken,path:req.path,dbUrl:process.env.DB_URL},hypothesisId:'B'});
     // #endregion
