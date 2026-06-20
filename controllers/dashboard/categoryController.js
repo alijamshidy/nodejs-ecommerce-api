@@ -2,6 +2,7 @@ const { responseReturn } = require("../../utils/response");
 const formidable = require("formidable");
 const cloudinary = require("cloudinary").v2;
 const categoryModel = require("../../models/categoryModel");
+const productModel = require("../../models/productModel");
 
 class categoryController {
   add_category = async (req, res) => {
@@ -82,6 +83,96 @@ class categoryController {
       }
     } catch (error) {
       console.log(error.message);
+    }
+  };
+
+  update_category = async (req, res) => {
+    const form = formidable();
+    form.parse(req, async (err, fields, files) => {
+      if (err) {
+        return responseReturn(res, 404, { error: "something went wrong" });
+      }
+
+      const categoryId = fields.categoryId?.trim();
+      const slug = fields.slug?.trim();
+      let name = fields.name?.trim();
+
+      try {
+        const query = categoryId
+          ? { _id: categoryId }
+          : slug
+            ? { slug }
+            : null;
+
+        if (!query) {
+          return responseReturn(res, 400, { error: "categoryId or slug is required" });
+        }
+
+        const existing = await categoryModel.findOne(query);
+        if (!existing) {
+          return responseReturn(res, 404, { error: "Category not found" });
+        }
+
+        const update = {};
+        if (name) {
+          update.name = name;
+          update.slug = name.split(" ").join("-");
+        }
+
+        if (files.image) {
+          cloudinary.config({
+            cloud_name: process.env.cloud_name,
+            api_key: process.env.api_key,
+            api_secret: process.env.api_secret,
+            secure: true,
+          });
+          const result = await cloudinary.uploader.upload(files.image.filepath, {
+            folder: "categorys",
+          });
+          if (result) {
+            update.image = result.url;
+          }
+        }
+
+        const category = await categoryModel.findByIdAndUpdate(
+          existing._id,
+          update,
+          { new: true },
+        );
+
+        responseReturn(res, 200, {
+          category,
+          message: "Category Updated Successfully",
+        });
+      } catch (error) {
+        responseReturn(res, 500, { error: error.message });
+      }
+    });
+  };
+
+  delete_category = async (req, res) => {
+    const { categoryId } = req.params;
+
+    try {
+      const category = await categoryModel.findById(categoryId);
+      if (!category) {
+        return responseReturn(res, 404, { error: "Category not found" });
+      }
+
+      const productCount = await productModel.countDocuments({
+        category: category.name,
+      });
+
+      if (productCount > 0) {
+        return responseReturn(res, 400, {
+          error: "Cannot delete category with existing products",
+        });
+      }
+
+      await categoryModel.findByIdAndDelete(categoryId);
+      responseReturn(res, 200, { message: "Category Deleted Successfully" });
+    } catch (error) {
+      responseReturn(res, 500, { error: error.message });
     }
   };
 }

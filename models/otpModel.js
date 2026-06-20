@@ -20,6 +20,10 @@ const otpSchema = new Schema(
       type: Number,
       default: 0,
     },
+    purpose: {
+      type: String,
+      default: "login",
+    },
   },
   { timestamps: true }
 );

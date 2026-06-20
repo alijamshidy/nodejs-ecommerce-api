@@ -28,6 +28,21 @@ services:
     depends_on:
       mongodb:
         condition: service_healthy
+      seed:
+        condition: service_completed_successfully
+
+  seed:
+    build: .
+    container_name: backend-seed
+    env_file:
+      - .env
+    environment:
+      DB_URL: mongodb://mongodb:27017/myapp_db
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    command: ["node", "seed/seed.js"]
+    restart: "no"
 
 volumes:
   mongodb_data:

@@ -96,15 +96,68 @@ docker compose down
 docker compose down -v
 ```
 
-> In Docker Compose, `DB_URL` is overridden to `mongodb://mongodb:27017/backend`.
+> In Docker Compose, `DB_URL` is overridden to `mongodb://mongodb:27017/myapp_db`.
+
+On first startup, MongoDB loads sample data from `init_data/init.js`. A `seed` service also runs before the API starts and fills any empty collections.
+
+## Seed Data
+
+The project includes 120+ sample records per main collection (150 products, plus orders, reviews, cart, wishlist, categories, sellers, customers, and CMS content).
+
+**Test accounts** (password for all: `123456`):
+
+| Role     | Email examples                          |
+| -------- | --------------------------------------- |
+| Admin    | `a@admin.com`                           |
+| Seller   | `seller1@test.com` … `seller120@test.com` |
+| Customer | `customer1@test.com` … `customer120@test.com` |
+
+### Local seed commands
+
+```bash
+# Seed if collections are empty
+npm run seed
+
+# Drop and reseed all sample collections
+npm run seed:force
+
+# Regenerate init_data/init.js from seed/build-data.js
+npm run seed:generate
+```
+
+### Docker seed commands
+
+```bash
+# Full stack (MongoDB + seed + API)
+docker compose up --build
+
+# Manual reseed without deleting the volume
+docker compose run --rm seed node seed/seed.js --force
+
+# Fresh database (removes MongoDB volume, reruns init_data on next up)
+docker compose down -v
+docker compose up --build
+```
+
+Seed source files:
+
+| Path | Purpose |
+| ---- | ------- |
+| `seed/build-data.js` | Shared data generator |
+| `seed/seed.js` | Mongoose seeder (`--force` to replace) |
+| `seed/generate-init.js` | Writes `init_data/init.js` for MongoDB first boot |
+| `init_data/init.js` | Auto-loaded by MongoDB on empty volume |
 
 ## Scripts
 
-| Command          | Description                   |
-| ---------------- | ----------------------------- |
-| `npm start`      | Production (`node server.js`) |
-| `npm run dev`    | Development with nodemon      |
-| `npm run server` | Alias for `dev`               |
+| Command               | Description                              |
+| --------------------- | ---------------------------------------- |
+| `npm start`           | Production (`node server.js`)            |
+| `npm run dev`         | Development with nodemon                 |
+| `npm run server`      | Alias for `dev`                          |
+| `npm run seed`        | Insert sample data (skip existing)       |
+| `npm run seed:force`  | Drop and reseed sample collections       |
+| `npm run seed:generate` | Regenerate `init_data/init.js`         |
 
 ## Project Structure
 
@@ -119,6 +172,8 @@ backend/
 ├── docs/
 │   ├── swagger.js           # Swagger UI setup
 │   └── openapi/             # OpenAPI 3 spec (paths, components)
+├── seed/                    # Sample data generator and seeder
+├── init_data/               # MongoDB init script (Docker first boot)
 ├── Dockerfile
 ├── docker-compose.yml
 └── .env.example

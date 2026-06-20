@@ -1,4 +1,5 @@
 const adminModel = require("../models/adminModel");
+const customerModel = require("../models/customerModel");
 const sellerModel = require("../models/sellerModel");
 const sellerCustomerModel = require("../models/Chat/sellerCustomerModel");
 const { responseReturn } = require("../utils/response");
@@ -53,6 +54,14 @@ class authControllers {
           return responseReturn(res, 404, { error: "User not found" });
         }
         responseReturn(res, 200, { userInfo: user });
+      } else if (role === "customer") {
+        const customer = await customerModel.findById(id);
+        if (!customer) {
+          return responseReturn(res, 404, { error: "User not found" });
+        }
+        responseReturn(res, 200, {
+          userInfo: { ...customer.toObject(), role: "customer" },
+        });
       } else {
         const seller = await sellerModel.findById(id);
         // #region agent log
@@ -135,9 +144,13 @@ class authControllers {
   };
 
   profile_image_upload = async (req, res) => {
-    const { id } = req;
+    const { id, role } = req;
     const form = formidable({ multiples: true });
     form.parse(req, async (err, _, files) => {
+      if (err) {
+        return responseReturn(res, 404, { error: "something went wrong" });
+      }
+
       cloudinary.config({
         cloud_name: process.env.cloud_name,
         api_key: process.env.api_key,
@@ -151,6 +164,17 @@ class authControllers {
           folder: "profile",
         });
         if (result) {
+          if (role === "customer") {
+            await customerModel.findByIdAndUpdate(id, {
+              image: result.url,
+            });
+            const userInfo = await customerModel.findById(id);
+            return responseReturn(res, 201, {
+              message: "Profile Image Upload Successfully",
+              userInfo: { ...userInfo?.toObject(), role: "customer" },
+            });
+          }
+
           await sellerModel.findByIdAndUpdate(id, {
             image: result.url,
           });
@@ -169,10 +193,23 @@ class authControllers {
   };
 
   profile_info_add = async (req, res) => {
-    const { division, district, shopName, sub_district } = req.body;
-    const { id } = req;
+    const { division, district, shopName, sub_district, name } = req.body;
+    const { id, role } = req;
 
     try {
+      if (role === "customer") {
+        const update = {};
+        if (typeof name === "string" && name.trim()) {
+          update.name = name.trim();
+        }
+        await customerModel.findByIdAndUpdate(id, update);
+        const userInfo = await customerModel.findById(id);
+        return responseReturn(res, 201, {
+          message: "Profile info Add Successfully",
+          userInfo: { ...userInfo?.toObject(), role: "customer" },
+        });
+      }
+
       await sellerModel.findByIdAndUpdate(id, {
         shopInfo: {
           shopName,

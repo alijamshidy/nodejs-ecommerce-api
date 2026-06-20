@@ -17,6 +17,10 @@ const customerSchema = new Schema({
     method: {
         type: String,
         required: true
+    },
+    image: {
+        type: String,
+        default: ""
     }
 }, {timestamps: true})
 

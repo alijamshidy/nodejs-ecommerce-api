@@ -37,6 +37,7 @@ class customerAuthControllers {
           name: createCustomer.name,
           email: createCustomer.email,
           method: createCustomer.method,
+          role: "customer",
         });
         res.cookie("customerToken", token, {
           expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
@@ -62,6 +63,7 @@ class customerAuthControllers {
             name: customer.name,
             email: customer.email,
             method: customer.method,
+            role: "customer",
           });
           res.cookie("customerToken", token, {
             expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
@@ -176,6 +178,7 @@ class customerAuthControllers {
         name: customer.name,
         email: customer.email,
         method: customer.method,
+        role: "customer",
       });
 
       res.cookie("customerToken", token, {
@@ -183,6 +186,111 @@ class customerAuthControllers {
       });
 
       responseReturn(res, 201, { message: "User Login Success", token });
+    } catch (error) {
+      responseReturn(res, 500, { error: error.message });
+    }
+  };
+
+  reset_password_request = async (req, res) => {
+    const email = req.body.email?.trim()?.toLowerCase();
+
+    if (!email) {
+      return responseReturn(res, 400, { error: "Email is required" });
+    }
+
+    try {
+      const customer = await customerModel.findOne({ email });
+
+      if (!customer) {
+        return responseReturn(res, 200, {
+          message: "If this email is registered, an OTP has been sent",
+        });
+      }
+
+      const recentOtp = await otpModel.findOne({ email }).sort({ createdAt: -1 });
+
+      if (
+        recentOtp &&
+        Date.now() - recentOtp.createdAt.getTime() < OTP_RESEND_COOLDOWN_MS
+      ) {
+        return responseReturn(res, 429, {
+          error: "Please wait before requesting a new OTP",
+        });
+      }
+
+      const otp = generateOtp();
+      const otpHash = await bcrypt.hash(otp, 10);
+      const expiresAt = new Date(Date.now() + OTP_EXPIRY_MS);
+
+      await otpModel.deleteMany({ email });
+      await otpModel.create({ email, otpHash, expiresAt, purpose: "reset" });
+      await sendOtpEmail(email, otp);
+
+      responseReturn(res, 200, {
+        message: "If this email is registered, an OTP has been sent",
+      });
+    } catch (error) {
+      responseReturn(res, 500, { error: error.message });
+    }
+  };
+
+  reset_password_confirm = async (req, res) => {
+    const email = req.body.email?.trim()?.toLowerCase();
+    const otp = req.body.otp?.trim();
+    const password = req.body.password;
+
+    if (!email || !otp || !password) {
+      return responseReturn(res, 400, {
+        error: "Email, OTP, and password are required",
+      });
+    }
+
+    if (String(password).length < 6) {
+      return responseReturn(res, 400, {
+        error: "Password must be at least 6 characters",
+      });
+    }
+
+    try {
+      const otpRecord = await otpModel.findOne({ email });
+
+      if (!otpRecord) {
+        return responseReturn(res, 404, { error: "Invalid or expired OTP" });
+      }
+
+      if (otpRecord.expiresAt < new Date()) {
+        await otpModel.deleteOne({ _id: otpRecord._id });
+        return responseReturn(res, 404, { error: "Invalid or expired OTP" });
+      }
+
+      if (otpRecord.attempts >= MAX_VERIFY_ATTEMPTS) {
+        await otpModel.deleteOne({ _id: otpRecord._id });
+        return responseReturn(res, 404, {
+          error: "Too many failed attempts. Please request a new OTP",
+        });
+      }
+
+      const match = await bcrypt.compare(otp, otpRecord.otpHash);
+
+      if (!match) {
+        otpRecord.attempts += 1;
+        await otpRecord.save();
+        return responseReturn(res, 404, { error: "Invalid OTP" });
+      }
+
+      const customer = await customerModel
+        .findOne({ email })
+        .select("+password");
+
+      if (!customer) {
+        return responseReturn(res, 404, { error: "Email Not Found" });
+      }
+
+      customer.password = await bcrypt.hash(password, 10);
+      await customer.save();
+      await otpModel.deleteOne({ _id: otpRecord._id });
+
+      responseReturn(res, 200, { message: "Password reset successfully" });
     } catch (error) {
       responseReturn(res, 500, { error: error.message });
     }
