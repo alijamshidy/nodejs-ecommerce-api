@@ -1,196 +1,313 @@
 # Node.js E-Commerce API
 
-REST API and real-time Socket.IO server for a multi-vendor e-commerce marketplace. It powers authentication, sellers, customers, products, categories, collections, cart, wishlist, orders, payments, content management, chat, reports, and Swagger/OpenAPI documentation.
+A comprehensive **E-Commerce Backend API** built with **Node.js, Express, and MongoDB**. This API provides all the essential features for an e-commerce platform including user authentication, product management, order processing, payment handling, and real-time chat.
 
-## Screenshot
+---
 
-Add screenshots to `docs/screenshots/` and update the links below:
+## 📸 Screenshot
+*(Add your API documentation screenshot here - e.g., Swagger UI or Postman collection)*
 
-```md
-![Swagger API docs](docs/screenshots/swagger.png)
-![API response example](docs/screenshots/api-response.png)
-```
+---
 
-## Features
+## ✨ Features
 
-- Admin, seller, and customer authentication
-- JWT/cookie-based protected routes
-- OTP email login support
-- Product, category, collection, seller, and report modules
-- Customer cart, wishlist, reviews, and order flows
-- Stripe payment integration
-- Cloudinary media uploads
-- Content management for header, slider, recommendations, FAQ, and contact sections
-- Real-time chat between admin, sellers, and customers with Socket.IO
-- MongoDB persistence with Mongoose models
-- Seed scripts for initial data
-- Swagger UI and OpenAPI JSON endpoint
-- Docker and Docker Compose setup with MongoDB
+### 🔐 **Authentication & Authorization**
+- User registration and login with JWT
+- Role-based access control (Admin, Seller, Customer)
+- Password hashing with bcrypt
+- Cookie-based authentication
 
-## Tech Stack
+### 🛍 **Product Management**
+- CRUD operations for products
+- Category and collection management
+- Product search and filtering
+- Image upload with Cloudinary
 
-- Node.js
-- Express.js
-- MongoDB
-- Mongoose
-- Socket.IO
-- JWT
-- Stripe
-- Cloudinary
-- Nodemailer
-- Swagger UI Express
-- Docker
+### 💳 **Order & Payment**
+- Order creation and management
+- Payment gateway integration
+- Order status tracking
+- Refund processing
 
-## Installation
+### 📊 **Dashboard**
+- Admin dashboard with analytics
+- Seller dashboard for product management
+- Report generation
+- Sales statistics
 
-Clone the repository:
+### 💬 **Real-time Features**
+- Customer support chat
+- Real-time notifications
 
-```bash
-git clone https://github.com/alijamshidy/nodejs-ecommerce-api.git
-cd nodejs-ecommerce-api
-```
+### 📝 **Content Management**
+- Blog and content management
+- FAQ and help center
 
-Install dependencies:
+---
 
-```bash
-npm install
-```
+## 🛠 Tech Stack
 
-Create `.env` from the example file:
+**Backend Framework:**
+- [Node.js](https://nodejs.org/) - JavaScript runtime
+- [Express.js](https://expressjs.com/) - Web framework
 
-```bash
-cp .env.example .env
-```
+**Database:**
+- [MongoDB](https://www.mongodb.com/) - NoSQL database
+- [Mongoose](https://mongoosejs.com/) - ODM library
 
-Start MongoDB locally, then run the API:
+**Authentication:**
+- [JSON Web Tokens (JWT)](https://jwt.io/) - Secure token-based auth
+- [bcrypt](https://www.npmjs.com/package/bcrypt) - Password hashing
+- [cookie-parser](https://www.npmjs.com/package/cookie-parser) - Cookie handling
 
-```bash
-npm run dev
-```
+**File Upload & Storage:**
+- [Cloudinary](https://cloudinary.com/) - Image and file storage
+- [formidable](https://www.npmjs.com/package/formidable) - File upload handling
 
-The server runs on the port defined in `PORT`, usually `http://localhost:5000`.
+**Utilities:**
+- [dotenv](https://www.npmjs.com/package/dotenv) - Environment variables
+- [cors](https://www.npmjs.com/package/cors) - Cross-origin support
+- [moment](https://momentjs.com/) - Date/time handling
 
-### Docker
+**Development Tools:**
+- [ESLint](https://eslint.org/) - Code linting
+- [Docker](https://www.docker.com/) - Containerization
 
-```bash
-docker compose up --build
-```
+---
 
-Docker Compose starts MongoDB, runs the seed service, and starts the backend API.
+## 💻 Installation
 
-## Environment Variables
+### Prerequisites
+- Node.js (v18 or later)
+- MongoDB (local or Atlas)
+- Git
+
+### Quick Start
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/alijamshidy/nodejs-ecommerce-api.git
+   cd nodejs-ecommerce-api
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables:**
+   ```bash
+   cp .env.example .env
+   ```
+   Edit `.env` file with your configuration (see [Environment Variables](#-environment-variables))
+
+4. **Run the development server:**
+   ```bash
+   npm run dev
+   ```
+
+5. **Run with Docker (optional):**
+   ```bash
+   docker-compose up -d
+   ```
+
+The server will start at `http://localhost:5000`
+
+---
+
+## ⚙ Environment Variables
+
+Create a `.env` file in the root directory and add the following variables:
 
 ```env
+# Server Configuration
 PORT=5000
+NODE_ENV=development
+
+# MongoDB Connection
 DB_URL=mongodb://localhost:27017/myapp_db
-SECRET=change_me_to_a_long_random_string
 
-cloud_name=your_cloudinary_cloud_name
-api_key=your_cloudinary_api_key
-api_secret=your_cloudinary_api_secret
+# JWT Configuration
+JWT_SECRET=your_jwt_secret_key_here
+JWT_EXPIRES_IN=30d
 
-STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
+# Cloudinary Configuration
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
 
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_SECURE=false
-SMTP_USER=your-email@gmail.com
-SMTP_PASS=your-app-password
-SMTP_FROM="Your Shop <your-email@gmail.com>"
+# Cookie Configuration
+COOKIE_EXPIRES=30
+
+# Payment Gateway (Stripe example)
+STRIPE_SECRET_KEY=your_stripe_secret_key
+STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
 ```
 
-## Folder Structure
+---
 
-```text
-.
-├── controllers/
+## 📁 Folder Structure
+
+```
+nodejs-ecommerce-api/
+├── controllers/           # Route controllers
+│   ├── authControllers.js
 │   ├── chat/
 │   ├── content/
 │   ├── dashboard/
 │   ├── home/
 │   ├── order/
 │   └── payment/
-├── docs/
-│   └── openapi/
-├── init_data/
-├── middlewares/
-├── models/
+├── models/               # MongoDB models
 │   ├── Chat/
 │   └── content/
-├── routes/
+├── routes/               # API routes
 │   ├── content/
 │   ├── dashboard/
 │   ├── home/
-│   └── order/
-├── seed/
-├── utils/
-├── docker-compose.yml
-├── Dockerfile
-└── server.js
+│   ├── order/
+│   └── payment/
+├── middlewares/          # Express middlewares
+├── utils/                # Utility functions
+├── seed/                 # Database seeding scripts
+├── init_data/            # Initial data
+├── docs/                 # API documentation
+│   └── openapi/
+│       ├── components.js
+│       ├── index.js
+│       └── paths/
+├── .env.example           # Environment variables template
+├── .dockerignore
+├── AGENTS.md
+├── package.json
+└── README.md
 ```
 
-## Demo
+---
 
-No public backend demo URL is configured yet.
+## 🚀 Demo
 
-Local API:
-
-```text
-http://localhost:5000
+### Run the API locally:
+```bash
+npm run dev
 ```
 
-## API Documentation
+### Test with Postman/Thunder Client:
+- Import the Postman collection (if available)
+- Base URL: `http://localhost:5000/api`
 
-After starting the server, open:
+### API Documentation:
+- **Swagger/OpenAPI docs available at:** `/api-docs` (if configured)
+- **Postman collection:** Available in `docs/` directory
 
-```text
-http://localhost:5000/api-docs
+---
+
+## 📡 API Documentation
+
+### Base URL
+```
+https://your-domain.com/api/v1
 ```
 
-OpenAPI JSON:
+### Authentication Endpoints
 
-```text
-http://localhost:5000/api-docs.json
-```
+| Method | Endpoint | Description | Access |
+|--------|----------|-------------|--------|
+| POST | `/api/v1/auth/register` | Register new user | Public |
+| POST | `/api/v1/auth/login` | User login | Public |
+| POST | `/api/v1/auth/logout` | User logout | Private |
+| GET | `/api/v1/auth/me` | Get current user | Private |
 
-Main route groups:
+### Product Endpoints
 
-| Area | Base path |
-| --- | --- |
-| Dashboard categories | `/api` |
-| Dashboard products | `/api` |
-| Dashboard reports | `/api` |
-| Dashboard sellers | `/api` |
-| Auth | `/api` |
-| Customer auth | `/api` |
-| Storefront home | `/api/home` |
-| Content | `/api` and `/api/home` |
-| Orders | `/api` |
-| Chat | `/api` |
-| Payments | `/api` |
+| Method | Endpoint | Description | Access |
+|--------|----------|-------------|--------|
+| GET | `/api/v1/products` | Get all products | Public |
+| GET | `/api/v1/products/:id` | Get single product | Public |
+| POST | `/api/v1/products` | Create product | Seller/Admin |
+| PUT | `/api/v1/products/:id` | Update product | Seller/Admin |
+| DELETE | `/api/v1/products/:id` | Delete product | Seller/Admin |
 
-Socket.IO events include:
+### Order Endpoints
 
-- `add_user`
-- `add_seller`
-- `add_admin`
-- `send_seller_message`
-- `send_customer_message`
-- `send_message_admin_to_seller`
-- `send_message_seller_to_admin`
-- `send_message_admin_to_customer`
-- `send_message_customer_to_admin`
+| Method | Endpoint | Description | Access |
+|--------|----------|-------------|--------|
+| GET | `/api/v1/orders` | Get user orders | Private |
+| GET | `/api/v1/orders/:id` | Get order details | Private |
+| POST | `/api/v1/orders` | Create new order | Private |
+| PUT | `/api/v1/orders/:id/cancel` | Cancel order | Private |
 
-## Repository Metadata
+### Category & Collection Endpoints
 
-Suggested description:
+| Method | Endpoint | Description | Access |
+|--------|----------|-------------|--------|
+| GET | `/api/v1/categories` | Get all categories | Public |
+| POST | `/api/v1/categories` | Create category | Admin |
+| GET | `/api/v1/collections` | Get all collections | Public |
+| POST | `/api/v1/collections` | Create collection | Admin |
 
-```text
-Express and MongoDB marketplace API with auth, products, orders, Stripe payments, Cloudinary uploads, Socket.IO chat, seed data, Docker, and Swagger docs.
-```
+### Payment Endpoints
 
-Suggested topics:
+| Method | Endpoint | Description | Access |
+|--------|----------|-------------|--------|
+| POST | `/api/v1/payment/create` | Create payment intent | Private |
+| POST | `/api/v1/payment/confirm` | Confirm payment | Private |
+| GET | `/api/v1/payment/:id` | Get payment details | Private |
 
-```text
-nodejs, express, mongodb, mongoose, ecommerce, marketplace, rest-api, socket-io, stripe, cloudinary, swagger, docker
-```
+### Chat Endpoints
+
+| Method | Endpoint | Description | Access |
+|--------|----------|-------------|--------|
+| GET | `/api/v1/chat` | Get user chats | Private |
+| POST | `/api/v1/chat` | Start new chat | Private |
+| POST | `/api/v1/chat/:id/message` | Send message | Private |
+
+### Dashboard Endpoints (Admin/Seller)
+
+| Method | Endpoint | Description | Access |
+|--------|----------|-------------|--------|
+| GET | `/api/v1/dashboard/stats` | Get dashboard statistics | Admin |
+| GET | `/api/v1/dashboard/sales` | Get sales reports | Admin |
+| GET | `/api/v1/dashboard/users` | Get users list | Admin |
+
+---
+
+## 📦 Available Scripts
+
+| Script | Description |
+|--------|-------------|
+| `npm run dev` | Start development server |
+| `npm run start` | Start production server |
+| `npm run test` | Run tests |
+| `npm run lint` | Run ESLint |
+| `npm run seed` | Seed database with initial data |
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
+
+## 📜 License
+
+This project is **private** and all rights are reserved.
+
+---
+
+## 🆘 Support
+
+For support, please open an issue or contact the maintainer.
+
+---
+
+## 🏷 Topics
+
+`nodejs`, `express`, `mongodb`, `mongoose`, `ecommerce`, `api`, `rest-api`, `jwt-authentication`, `cloudinary`, `docker`, `backend`, `javascript`
