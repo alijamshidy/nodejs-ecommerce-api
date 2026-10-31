@@ -6,6 +6,14 @@ A comprehensive **Multi-Vendor E-Commerce Backend API** built with **Node.js, Ex
 
 ---
 
+## 📸 Screenshots
+
+| Interactive API docs — Swagger UI (`/api-docs`) |
+|-------------------------------------------------|
+| ![Swagger UI](docs/screenshots/swagger.png) |
+
+---
+
 ## ✨ Features
 
 ### 🔐 **Authentication**
